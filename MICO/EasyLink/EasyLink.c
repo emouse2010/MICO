@@ -73,19 +73,12 @@ extern OSStatus     MICOstartConfigServer         ( mico_Context_t * const inCon
 void EasyLinkNotify_WifiStatusHandler(WiFiEvent event, mico_Context_t * const inContext)
 {
   easylink_log_trace();
-  IPStatusTypedef para;
-
   require(inContext, exit);
   switch (event) {
   case NOTIFY_STATION_UP:
     easylink_log("Access point connected");
     MicoRfLed(true);
     mico_rtos_set_semaphore(&easylink_sem);
-    micoWlanGetIPStatus(&para, Station);
-    strncpy(inContext->flashContentInRam.micoSystemConfig.localIp, para.ip, maxIpLen);
-    strncpy(inContext->flashContentInRam.micoSystemConfig.netMask, para.mask, maxIpLen);
-    strncpy(inContext->flashContentInRam.micoSystemConfig.gateWay, para.gate, maxIpLen);
-    strncpy(inContext->flashContentInRam.micoSystemConfig.dnsServer, para.dns, maxIpLen);
     break;
   case NOTIFY_STATION_DOWN:
     MicoRfLed(false);
@@ -538,7 +531,7 @@ Reconn:
     HTTPHeaderClear( httpHeader );
     SocketClose(&easylinkClient_fd);
     easylinkClient_fd = -1;
-    require(reConnCount < 6, reboot);
+    require(reConnCount < 6, threadexit);
     reConnCount++;
     sleep(5);
   }  
